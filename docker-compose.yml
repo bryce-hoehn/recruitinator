@@ -1,0 +1,11 @@
+services:
+  census:
+    build: .
+    image: recruitinator-census
+    env_file: .env          # OPENAI_API_KEY (optional: OPENAI_BASE_URL, OPENAI_MODEL)
+    volumes:
+      - ./data:/app/data    # census.csv — resumable progress
+    restart: on-failure     # crash -> resume from census.csv; clean finish -> stay stopped
+
+# One-off runs, e.g. retry the unknowns:
+#   docker compose run --rm census python scripts/census.py --search Adyen --redo

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ddg-search": {
+      "command": "uvx",
+      "args": ["duckduckgo-mcp-server"]
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"]
+    }
+  }
+}
