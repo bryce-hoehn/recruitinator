@@ -87,7 +87,9 @@ SYSTEM_PROMPT = (
     "company's own careers site or ATS board; ignore aggregators like LinkedIn/Indeed.\n\n"
     "When done, call append_census_row exactly once with your findings, then stop. Work "
     "efficiently: typically one search plus one or two fetches is enough. Never invent URLs "
-    "you did not see in search results or fetched pages."
+    "you did not see in search results or fetched pages. You must call append_census_row "
+    "even when you find nothing: use job_postings_url=\"\" and has_api=\"not_found\". "
+    "Never end the task with a plain text answer."
 )
 
 
@@ -239,14 +241,23 @@ class CensusAgent:
                 return await self._append_local(args)
             return await self.call_tool(tc.function.name, args)
 
-        for _ in range(self.max_steps):
+        for step in range(self.max_steps):
             try:
                 response = await self.chat(messages)
             except Exception as e:
                 return f"llm-error: {e}"
             msg = response.choices[0].message
             if not msg.tool_calls:
-                break
+                if appended or step == self.max_steps - 1:
+                    break
+                # model tried to stop with a text answer — force the append call
+                messages.append(msg)
+                messages.append({"role": "user", "content": (
+                    "Call append_census_row now with your final findings. If you could not "
+                    "locate a jobs page, use job_postings_url=\"\" and has_api=\"not_found\". "
+                    "Do not reply with text only."
+                )})
+                continue
             messages.append(msg)
             # run all tool calls of this turn concurrently (searches/fetches don't
             # depend on each other unless the model says so by splitting turns)

@@ -12,6 +12,11 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-dev
 
+# Node.js lets mcp-server-fetch use Readability.js for much better page
+# extraction (pure-Python fallback is low quality and warns on every fetch)
+RUN apt-get update && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
 # Pre-install the MCP servers used by mcp.json so uvx needs no network at startup
 RUN uv tool install searxng-http-mcp && uv tool install mcp-server-fetch
 
