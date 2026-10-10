@@ -267,7 +267,25 @@ class CensusAgent:
             if appended:
                 break
 
-        if not appended:  # agent never called append — record a miss so we don't loop forever
+        if not appended:
+            # step limit exhausted without an append — demand it one last time
+            messages.append({"role": "user", "content": (
+                "Step limit reached. Stop searching and call append_census_row now with your "
+                'best findings so far. If you found no jobs page, use job_postings_url="" '
+                'and has_api="not_found".'
+            )})
+            try:
+                response = await self.chat(messages)
+            except Exception as e:
+                return f"llm-error: {e}"
+            msg = response.choices[0].message
+            if msg.tool_calls:
+                messages.append(msg)
+                outputs = await asyncio.gather(*(execute(tc) for tc in msg.tool_calls))
+                for tc, output in zip(msg.tool_calls, outputs):
+                    messages.append({"role": "tool", "tool_call_id": tc.id, "content": output})
+
+        if not appended:  # agent still never called append — record a miss so we don't loop forever
             append_row(self.csv_path, {
                 "company_name": company, "job_postings_url": "",
                 "has_api": "unknown", "notes": "agent did not call append_census_row",
