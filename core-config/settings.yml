@@ -1,0 +1,21 @@
+# SearXNG instance config (mounted at /etc/searxng/ by docker-compose.yml).
+# Docs: https://docs.searxng.org/admin/settings/settings.yml.html
+use_default_settings: true
+
+server:
+  # Signatures for browser cookies etc. — replace with any long random string.
+  secret_key: "change-me-to-a-random-string"
+  # This instance is private to the compose network; the bot limiter would only
+  # interfere with JSON API traffic from the census agents.
+  limiter: false
+  image_proxy: true
+
+search:
+  # The JSON API is what searxng-http-mcp consumes. SearXNG ships html-only by
+  # default; JSON should only be enabled on private instances (per the docs).
+  formats:
+    - html
+    - json
+
+valkey:
+  url: valkey://valkey:6379/0

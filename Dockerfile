@@ -13,7 +13,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-dev
 
 # Pre-install the MCP servers used by mcp.json so uvx needs no network at startup
-RUN uv tool install duckduckgo-mcp-server && uv tool install mcp-server-fetch
+RUN uv tool install searxng-http-mcp && uv tool install mcp-server-fetch
 
 COPY scripts/ scripts/
 COPY mcp.json netherlands-sponsors.csv ./

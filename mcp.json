@@ -1,8 +1,8 @@
 {
   "mcpServers": {
-    "ddg-search": {
+    "search": {
       "command": "uvx",
-      "args": ["duckduckgo-mcp-server"]
+      "args": ["searxng-http-mcp"]
     },
     "fetch": {
       "command": "uvx",
